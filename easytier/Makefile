@@ -61,9 +61,18 @@ define Package/$(PKG_NAME)/config
 		  Install the easytier-web web console.
 endef
 
+# Bundled prebuilt binaries (offline build): files/bin/
+EASYTIER_LOCAL_BIN:=$(CURDIR)/files/bin
+
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	if [ ! -f $(PKG_BUILD_DIR)/easytier-core ]; then \
+	if [ -f $(EASYTIER_LOCAL_BIN)/easytier-core ]; then \
+		echo "Using bundled easytier binaries"; \
+		cp -f $(EASYTIER_LOCAL_BIN)/easytier-core $(PKG_BUILD_DIR)/; \
+		cp -f $(EASYTIER_LOCAL_BIN)/easytier-cli $(PKG_BUILD_DIR)/; \
+		[ ! -f $(EASYTIER_LOCAL_BIN)/easytier-web-embed ] || cp -f $(EASYTIER_LOCAL_BIN)/easytier-web-embed $(PKG_BUILD_DIR)/; \
+	elif [ ! -f $(PKG_BUILD_DIR)/easytier-core ]; then \
+		echo "Downloading easytier $(PKG_VERSION) for $(APP_ARCH)"; \
 		wget https://github.com/EasyTier/EasyTier/releases/download/v$(PKG_VERSION)/$(PKG_NAME)-linux-$(APP_ARCH)-v$(PKG_VERSION).zip -O $(PKG_BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION).zip; \
 		unzip -o -j $(PKG_BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION).zip -d $(PKG_BUILD_DIR); \
 		rm -f $(PKG_BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION).zip; \
